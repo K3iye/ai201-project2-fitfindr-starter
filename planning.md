@@ -17,17 +17,24 @@ You must have at least 3 tools. The three required tools are listed — add any 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
 
+This searches using keywords to find items that match the parameters used. It returns a dictionary of the relevant items with all their information like id, title, description, category, and more.
+
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `description` (str): ...
-- `size` (str): ...
-- `max_price` (float): ...
+
+- `description` (str): category of clothing
+- `size` (str): Optional input, represents size of the clothing 
+- `max_price` (float): Optional input, represents inclusive max price of the clothing item
 
 **What it returns:**
 <!-- Describe the return value — what fields does a result contain? -->
 
+Returns a list of dicts that are sorted by relevance, where most relevant is the first item. Each of these dicts contain all the fields that are listed in listing.json, such as (id, title, description , category, etc.)
+
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if no listings match? -->
+
+It should return an empty list and tell the user that no clothing can be found with the search results used. This should then prompt the user to search again using something else.
 
 ---
 
@@ -36,16 +43,23 @@ You must have at least 3 tools. The three required tools are listed — add any 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
 
+This tool looks at any new thrifted clothing items the user has purchased and compares it with their wardrobe. It then suggests 1-2 outfits for the user that has this new clothing item included in it. If the wardrobe is empty it instead suggests styling advice.
+
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `new_item` (dict): ...
-- `wardrobe` (dict): ...
+
+- `new_item` (dict): Contains the information on the item the user wants to purchase next
+- `wardrobe` (dict): a dict with an items key that has a list of item dicts.
 
 **What it returns:**
 <!-- Describe the return value -->
 
+Returns a string with outfit suggestions using the new item and the wardrobe, if the wardrobe is empty it instead returns styling advice using the new item.
+
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if the wardrobe is empty or no outfit can be suggested? -->
+
+It  should return a string that gives styling advice for the new item that the user wants to purchase.
 
 ---
 
@@ -54,16 +68,23 @@ You must have at least 3 tools. The three required tools are listed — add any 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
 
+This tool should take the outfit that was suggested from the suggest_outfit function and the new item the user purchased, to then create a 2-4 sentence social media caption for the user to post.
+
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `outfit` (str): ...
-- `new_item` (dict): ...
+
+- `outfit` (str):  One of the outfits suggested from suggest_outfit function
+- `new_item` (dict):  The new thrifted item that the user purchased 
 
 **What it returns:**
 <!-- Describe the return value -->
 
+Returns a 2-4 sentence message that the user can put on a social media caption for their new outfit that was made using the new thrifted item. 
+
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if the outfit data is incomplete? -->
+
+If the outfit data is incomplete the agent should return a message to the user that states what is missing.
 
 ---
 
@@ -77,6 +98,8 @@ You must have at least 3 tools. The three required tools are listed — add any 
 
 **How does your agent decide which tool to call next?**
 <!-- Describe the logic your planning loop uses. What does it look at? What conditions change its behavior? How does it know when it's done? -->
+
+
 
 ---
 
@@ -142,11 +165,19 @@ Write out what a full user interaction looks like from start to finish — tool 
 **Step 1:**
 <!-- What does the agent do first? Which tool is called? With what input? -->
 
+The agent should first use the search_listing function based on the users query. This is to find relevant clothing options for the user.
+
 **Step 2:**
 <!-- What happens next? What was returned from step 1? What tool is called now? -->
+
+Step 1 returns a list of dicts that are sorted by relevance where most relevant is the first. The agent should display all the items and after the user choses an item it should then call the suggest_outfit function using that item to then create outfits based on the new piece.
 
 **Step 3:**
 <!-- Continue until the full interaction is complete -->
 
+Step 2 returns a string of outfit suggestions or ways to style the new thrifted clothing piece. After this the user can select which outfit they like more and create_fit_card function should be called on that outfit to create a social media caption for a post.
+
 **Final output to user:**
 <!-- What does the user actually see at the end? -->
+
+The user should see the outfit with their social media caption at the end.
