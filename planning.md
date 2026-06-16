@@ -105,7 +105,7 @@ If results are returned, the agent displays each listing's information just like
 
 Next the agent calls suggest_outfit(new_item = selected_item, wardrobe = session["wardrobe"]). If the string returned is empty, the agent returns styling advice for the item. Otherwise it displays the 102 outfit suggestions and asks the user to pick one. The chosen outfit string should be stored as chosen_outfit.
 
-Lastly the agent calls create_fit_card(outfit = chosen_outfit, new_item = selected_item). If the outfit is missing or empty return an error message stating something went wrong and set chosen_outfit to none and prompt the user to pick the outfit again. Otherwise it should display the outfit its description and the caption for the user to copy and paste. 
+Lastly the agent calls create_fit_card(outfit = chosen_outfit, new_item = selected_item). If the outfit is missing or empty return an error message stating something went wrong and set chosen_outfit to none and prompt the user to pick the outfit again, this should have a retry limit of 2 attempts. Otherwise it should display the outfit its description and the caption for the user to copy and paste. 
 
 ---
 
@@ -147,11 +147,14 @@ flowchart TD
     H -- wardrobe not empty --> J[Display 1-2 outfit suggestions]
     I --> J
     J --> K([User selects outfit])
-    K --> L[Session: chosen_outfit = user choice]
+    K -- outfit missing/empty --> L[Session: chosen_outfit = None\nRetry count +1]
+    L -- retry < 2 --> J
+    L -- retry >= 2 --> M([ERROR: Could not get outfit selection\nReturn error message])
+    K -- outfit selected --> N[Session: chosen_outfit = user choice]
 
-    L --> M[create_fit_card\nchosen_outfit, selected_item]
-    M -- outfit missing/incomplete --> N([ERROR: Outfit data missing\nReturn error message])
-    M -- success --> O([Display caption to user\nInteraction complete])
+    N --> O[create_fit_card\nchosen_outfit, selected_item]
+    O -- success --> P([Display caption to user\nInteraction complete])
+
 ```
 
 ---
