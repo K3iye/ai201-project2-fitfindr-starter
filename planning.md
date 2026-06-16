@@ -132,17 +132,6 @@ For each tool, describe the specific failure mode you're handling and what the a
 
 ## Architecture
 
-<!-- Draw a diagram of your agent showing how the components connect:
-     User input → Planning Loop → Tools (search_listings, suggest_outfit, create_fit_card)
-                                                                          ↕
-                                                                   State / Session
-     Show what triggers each tool, how state flows between them, and where error paths branch off.
-     Use ASCII art or a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html).
-     Do NOT embed an image — graders need to read your diagram directly in the file;
-     an embedded image or screenshot cannot be evaluated.
-     You'll share this diagram with an AI tool when asking it to implement
-     the planning loop and each individual tool. -->
-
 User query ("vintage graphic tee under $30, baggy jeans, chunky sneakers")
     │
     ▼
@@ -173,7 +162,8 @@ Planning Loop
             │ success
             ▼
         Display caption to user → Interaction complete
-        
+
+
 ---
 
 ## AI Tool Plan
