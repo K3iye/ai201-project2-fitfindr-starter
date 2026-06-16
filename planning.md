@@ -99,7 +99,13 @@ If the outfit data is incomplete the agent should return a message to the user t
 **How does your agent decide which tool to call next?**
 <!-- Describe the logic your planning loop uses. What does it look at? What conditions change its behavior? How does it know when it's done? -->
 
+The agent first extracts description, size, and max_price from the users query and calls search_listings with this information. If the result is an empty list, the agent sets an error message telling the user no results were found and prompts them to try a different search. 
 
+If results are returned, the agent displays each listing's information just like listing.json where each listing has its own id, title, description, etc. This should wait for the user to select one before continuing, and the selcted item should be stored as selected_item in the code.
+
+Next the agent calls suggest_outfit(new_item = selected_item, wardrobe = session["wardrobe"]). If the string returned is empty, the agent returns styling advice for the item. Otherwise it displays the 102 outfit suggestions and asks the user to pick one. The chosen outfit string should be stored as chosen_outfit.
+
+Lastly the agent calls create_fit_card(outfit = chosen_outfit, new_item = selected_item). If the outfit is missing or empty return an error message stating something went wrong and set chosen_outfit to none and prompt the user to pick the outfit again. Otherwise it should display the outfit its description and the caption for the user to copy and paste. 
 
 ---
 
@@ -107,6 +113,8 @@ If the outfit data is incomplete the agent should return a message to the user t
 
 **How does information from one tool get passed to the next?**
 <!-- Describe how your agent stores and accesses state within a session. What data is tracked? How is it passed between tool calls? -->
+
+
 
 ---
 
@@ -135,6 +143,37 @@ For each tool, describe the specific failure mode you're handling and what the a
      You'll share this diagram with an AI tool when asking it to implement
      the planning loop and each individual tool. -->
 
+User query ("vintage graphic tee under $30, baggy jeans, chunky sneakers")
+    │
+    ▼
+Planning Loop
+    │
+    ├─► search_listings(description, size, max_price)
+    │       │ results=[]
+    │       ├──► [ERROR] "No items found, try a different search." → return
+    │       │
+    │       │ results=[item, ...]
+    │       ▼
+    │   Display listings (title, price, size, condition) → User selects item
+    │   Session: selected_item = user's choice
+    │       │
+    ├─► suggest_outfit(selected_item, wardrobe)
+    │       │ wardrobe empty
+    │       ├──► styling advice returned (no error, continues)
+    │       │
+    │       │ wardrobe not empty
+    │       ▼
+    │   Display 1-2 outfit suggestions → User selects outfit
+    │   Session: chosen_outfit = user's choice
+    │       │
+    └─► create_fit_card(chosen_outfit, selected_item)
+            │ outfit empty/incomplete
+            ├──► [ERROR] "Outfit data missing: ..." → return
+            │
+            │ success
+            ▼
+        Display caption to user → Interaction complete
+        
 ---
 
 ## AI Tool Plan
@@ -165,7 +204,11 @@ Write out what a full user interaction looks like from start to finish — tool 
 **Step 1:**
 <!-- What does the agent do first? Which tool is called? With what input? -->
 
-The agent should first use the search_listing function based on the users query. This is to find relevant clothing options for the user.
+The agent should first use the search_listing function based on the users query. This is to find relevant clothing options for the user. Search_listing(
+description = "vintage graphic tee",
+size = None,
+max_price = 30.0     
+)
 
 **Step 2:**
 <!-- What happens next? What was returned from step 1? What tool is called now? -->
@@ -180,4 +223,4 @@ Step 2 returns a string of outfit suggestions or ways to style the new thrifted 
 **Final output to user:**
 <!-- What does the user actually see at the end? -->
 
-The user should see the outfit with their social media caption at the end.
+The user sees the choosen outfit description and the generated caption that they can copy and use to post.
