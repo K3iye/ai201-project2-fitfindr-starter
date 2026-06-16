@@ -132,37 +132,27 @@ For each tool, describe the specific failure mode you're handling and what the a
 
 ## Architecture
 
-User query ("vintage graphic tee under $30, baggy jeans, chunky sneakers")
-    │
-    ▼
-Planning Loop
-    │
-    ├─► search_listings(description, size, max_price)
-    │       │ results=[]
-    │       ├──► [ERROR] "No items found, try a different search." → return
-    │       │
-    │       │ results=[item, ...]
-    │       ▼
-    │   Display listings (title, price, size, condition) → User selects item
-    │   Session: selected_item = user's choice
-    │       │
-    ├─► suggest_outfit(selected_item, wardrobe)
-    │       │ wardrobe empty
-    │       ├──► styling advice returned (no error, continues)
-    │       │
-    │       │ wardrobe not empty
-    │       ▼
-    │   Display 1-2 outfit suggestions → User selects outfit
-    │   Session: chosen_outfit = user's choice
-    │       │
-    └─► create_fit_card(chosen_outfit, selected_item)
-            │ outfit empty/incomplete
-            ├──► [ERROR] "Outfit data missing: ..." → return
-            │
-            │ success
-            ▼
-        Display caption to user → Interaction complete
+``` mermaid
+flowchart TD
+    A([User Query]) --> B[Planning Loop]
 
+    B --> C[search_listings\ndescription, size, max_price]
+    C -- results=[] --> D([ERROR: No items found\nPrompt user to retry])
+    C -- results found --> E[Display listings to user\ntitle, price, size, condition]
+    E --> F([User selects item])
+    F --> G[Session: selected_item = user choice]
+
+    G --> H[suggest_outfit\nselected_item, wardrobe]
+    H -- wardrobe empty --> I[Return styling advice\nfor selected_item]
+    H -- wardrobe not empty --> J[Display 1-2 outfit suggestions]
+    I --> J
+    J --> K([User selects outfit])
+    K --> L[Session: chosen_outfit = user choice]
+
+    L --> M[create_fit_card\nchosen_outfit, selected_item]
+    M -- outfit missing/incomplete --> N([ERROR: Outfit data missing\nReturn error message])
+    M -- success --> O([Display caption to user\nInteraction complete])
+```
 
 ---
 
