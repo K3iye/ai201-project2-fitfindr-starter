@@ -152,14 +152,23 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
         )
         prompt = (
             f"A user just thrifted this item: {item_summary}.\n\n"
-            f"Their wardrobe includes:\n{wardrobe_lines}\n\n"
-            "Suggest 1-2 complete outfits that include the new thrifted item and specific "
-            "named pieces from their wardrobe. Be specific about which wardrobe items to pair together."
+            f"Their wardrobe contains ONLY these items:\n{wardrobe_lines}\n\n"
+            "Suggest 1-2 complete outfits using the new thrifted item paired with pieces from the wardrobe list above. "
+            "You MUST only reference items that appear in the wardrobe list by their exact name. "
+            "Do not suggest any items that are not in the list."
         )
+
+    system_message = (
+        "You are a personal stylist. When given a wardrobe list, you ONLY suggest outfits "
+        "using items explicitly listed. Never invent or add items not in the list."
+    )
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": prompt},
+        ],
     )
 
     return response.choices[0].message.content
