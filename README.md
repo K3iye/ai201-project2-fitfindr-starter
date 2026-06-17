@@ -76,25 +76,30 @@ Your README submission must document each tool's name, inputs, and return value.
 
 **User query:**
 
+I am looking for a 90s track jacket in size M that I can wear during my track practice. Empty wardrobe was selected.
+
 **Step 1 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+
+- Tool: search_listings
+- Input: description = "90s track jacket track practice", size = "M", max_price = None
+- Why this tool: This tool is used to find relevant clothing options for the user based on the description they recieved. This filters and sorts for most relevant options.
+- Output: A list of dicts with the most relevant clothing items for the user.
 
 **Step 2 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+- Tool: suggest_outfit
+- Input: new_item is the most relevant item in the list of dictionarys from tool 1 call, and wardrobe is empty wardrobe since thats what the user selected.
+- Why this tool: This tool suggests different outfits for the user based on the new item and their wardrobe, if wardrobe is empty then it will give styling advice.
+- Output: This 90s track jacket is a versatile and nostalgic piece that can add a sporty touch to any outfit. To style it, pair it with distressed denim jeans, graphic t-shirts, and sleek sneakers for a casual, streetwear-inspired look that suits a relaxed, everyday vibe. You can also layer it over a hoodie or a simple white tee for a more athletic look, and don't be afraid to experiment with different accessories, such as baseball caps or chunky jewelry, to add a personal touch.
 
 **Step 3 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+- Tool: create_fit_card
+- Input: outfit = session["outfit_suggestion"], new_item = session["selected_item"]
+- Why this tool: This is the final tool used to create the caption talking about the outfit for social media. 
+- Output: Just scored this sick 90s Track Jacket for $45.0 on Poshmark and I'm obsessed with how it adds a sporty touch to my everyday look. Paired it with distressed denim and sleek sneakers for a casual, streetwear vibe that's perfect for running errands or grabbing brunch. The navy and white stripes are giving me major nostalgic feels - highly recommend snagging unique pieces like this to elevate your wardrobe.
 
 **Final output to user:**
+
+Just scored this sick 90s Track Jacket for $45.0 on Poshmark and I'm obsessed with how it adds a sporty touch to my everyday look. Paired it with distressed denim and sleek sneakers for a casual, streetwear vibe that's perfect for running errands or grabbing brunch. The navy and white stripes are giving me major nostalgic feels - highly recommend snagging unique pieces like this to elevate your wardrobe.
 
 ---
 
@@ -105,9 +110,9 @@ Your README submission must document each tool's name, inputs, and return value.
 
 | Tool | Failure mode | Agent response |
 |------|-------------|----------------|
-| `search_listings` | | |
-| `suggest_outfit` | | |
-| `create_fit_card` | | |
+| search_listings | No results match the query | No items found. Then prompt the user to retry |
+| suggest_outfit | Wardrobe is empty | Return styling advice to the user for the selected item|
+| create_fit_card | Outfit input is missing or incomplete |  ERROR: Outfit suggestion is missing. Try searching for a different item.|
 
 ---
 
@@ -117,7 +122,11 @@ Your README submission must document each tool's name, inputs, and return value.
 
 **One way planning.md helped during implementation:**
 
+The planning.md helped greatly during implementation by giving me a step-by-step guide on how my workflow should be. It also allowed me to stop and truly think about what needs to be done and how the tools need to function. I also really enjoyed having to make the mermaid diagrams since they help me visually see the process.
+
 **One divergence from your spec, and why:**
+
+Originally my spec called for the user to interactively select which listing they wanted and which outfit suggestion they preferreed before generating the fit card. While implementing this was changed because run_agent is called directly and expects an immediate return value, which blocks input. Instead the agent auto-selects the top-ranked result from search_listings and passes the outfit suggestion directly into create_fit_card.
 
 ---
 

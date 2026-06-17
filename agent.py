@@ -92,9 +92,75 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     Before writing code, complete the Planning Loop and State Management sections
     of planning.md — your implementation should match what you described there.
     """
-    # TODO: implement the planning loop
+    # Step 1: Initialize session
     session = _new_session(query, wardrobe)
-    session["error"] = "Planning loop not yet implemented."
+
+    # Step 2: Parse query — extract description, size, and max_price
+    import re
+
+    price_match = re.search(r"\$?(\d+(?:\.\d+)?)", query)
+    max_price = float(price_match.group(1)) if price_match else None
+
+    size_match = re.search(
+        r"\b(XXS|XS|S/M|S|M/L|M|L/XL|L|XL|XXL|XXXL|one size)\b",
+        query,
+        re.IGNORECASE,
+    )
+    size = size_match.group(1).upper() if size_match else None
+
+    description = re.sub(r"\$?\d+(?:\.\d+)?", "", query)
+    if size:
+        description = re.sub(size, "", description, flags=re.IGNORECASE)
+    description = re.sub(
+        r"\b(under|size|for|a|the|looking|find|me|i want|i'm looking for)\b",
+        "",
+        description,
+        flags=re.IGNORECASE,
+    ).strip()
+
+    session["parsed"] = {
+        "description": description,
+        "size": size,
+        "max_price": max_price,
+    }
+
+    # Step 3: Call search_listings — return early if no results
+    session["search_results"] = search_listings(description, size=size, max_price=max_price)
+
+    if not session["search_results"]:
+        session["error"] = (
+            "No listings found matching your search. "
+            "Try different keywords, a higher price, or a different size."
+        )
+        return session
+
+    # Step 4: Auto-select the top result
+    session["selected_item"] = session["search_results"][0]
+
+    # Step 5: Call suggest_outfit
+    session["outfit_suggestion"] = suggest_outfit(
+        session["selected_item"], session["wardrobe"]
+    )
+
+    if not session["outfit_suggestion"]:
+        session["error"] = "Could not generate an outfit suggestion. Please try again."
+        return session
+
+    # Step 6: Call create_fit_card using the full outfit suggestion
+    fit_card = create_fit_card(session["outfit_suggestion"], session["selected_item"])
+
+    if fit_card.startswith("ERROR"):
+        session["error"] = (
+            f"Caption could not be generated for '{session['selected_item']['title']}'. "
+            "The outfit suggestion may be empty or malformed. "
+            "Try a different search query."
+        )
+        return session
+
+    session["fit_card"] = fit_card
+    print(f"\nYour fit card caption:\n{fit_card}")
+
+    # Step 7: Return session
     return session
 
 
